@@ -7,12 +7,6 @@ const bodyParser = require('body-parser');
 const pathToSwaggerUi = require('swagger-ui-dist').absolutePath()
 
 const app = express();
-const cors = require('cors');
-const corsOptions = {
-    origin: 'http://localhost:8080',
-};
-
-app.use(cors(corsOptions));
 
 app.use(cookieParser());
 
@@ -23,14 +17,14 @@ const csrfProtection = csrf({
 
 // for every request, check whether csrf cookie token value and request header token value match
 // if they match, will go to next middleware, if not, will throw an error
-// app.use(csrfProtection);
+app.use(csrfProtection);
 
 app.use(bodyParser.json());
 
 app.use(express.urlencoded({ extended: true }));
 
 // express static used by react
-// app.use(express.static(__dirname + '/assets'));
+app.use(express.static(__dirname + '/assets'));
 
 // express static used by swagger
 app.use("/swagger",express.static(pathToSwaggerUi));
