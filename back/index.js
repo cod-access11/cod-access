@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const router = require('./app/router');
 const csrf = require('csurf');
@@ -6,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const pathToSwaggerUi = require('swagger-ui-dist').absolutePath()
 const path = require('path');
+
 
 const app = express();
 
@@ -39,6 +41,7 @@ app.use("/swagger", express.static(pathToSwaggerUi));
 
 // road in router
 app.use('/api/', router);
+
 
 const port = process.env.PORT || 5000;
 

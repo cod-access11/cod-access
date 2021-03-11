@@ -1,9 +1,11 @@
 import {
   FETCH_THEMES_EXERCISES,
+  FETCH_EXERCISE,
+  SEND_ANSWERS,
   setThemesExercises,
   setExercisesPageLoading,
   setAllThemesFilterCheckbox,
-  FETCH_EXERCISE,
+  setAllThemesIdToDisplay,
   setCurrentExercise,
 } from 'src/actions/exercises';
 import axiosInstance from 'src/api';
@@ -17,7 +19,6 @@ export default (store) => (next) => async (action) => {
         if (response.status !== 200) {
           throw new Error();
         }
-        store.dispatch(setThemesExercises(response.data));
         const ThemesFilterCheckbox = response.data.map((themeWithExercices) => (
           {
             id: themeWithExercices.id,
@@ -25,7 +26,14 @@ export default (store) => (next) => async (action) => {
             color: themeWithExercices.color,
             checked: false,
           }));
+
+        const themesIdToDisplay = response.data.map(
+          (themeWithExercices) => (themeWithExercices.id),
+        );
+
+        store.dispatch(setAllThemesIdToDisplay(themesIdToDisplay));
         store.dispatch(setAllThemesFilterCheckbox(ThemesFilterCheckbox));
+        store.dispatch(setThemesExercises(response.data));
       }
       catch (err) {
         console.log('error', err);
@@ -51,15 +59,38 @@ export default (store) => (next) => async (action) => {
           questions: data.questions,
         };
 
-        console.log(currentExercise);
-
         store.dispatch(setCurrentExercise(currentExercise));
       }
       catch (err) {
         console.log('error', err);
       }
       finally {
-        // store.dispatch(setExercisesPageLoading(false));
+        store.dispatch(setExercisesPageLoading(false));
+      }
+      return next(action);
+    case SEND_ANSWERS:
+      try {
+        const {
+          exercises: {
+            currentExercise,
+          },
+        } = store.getState();
+
+        const userAnswers = currentExercise.questions.map((question) => ({
+          questionId: question.id,
+          answers: question.userAnswers,
+        }));
+
+        const response = await axiosInstance.post(`/exercises/dragndrop/${currentExercise.id}`, userAnswers);
+
+        if (response.status !== 200) {
+          throw new Error();
+        }
+
+        console.log('réponses envoyées');
+      }
+      catch (err) {
+        console.log(err);
       }
       return next(action);
     default:
